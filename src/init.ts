@@ -4,69 +4,11 @@ import { copyFile, writeFile, readFile } from 'node:fs/promises';
 import { ChromeWebStoreOptions } from './chrome';
 import { FirefoxAddonStoreOptions } from './firefox';
 import { EdgeAddonStoreOptions } from './edge';
-import http from 'http';
+import { ofetch } from 'ofetch';
 
 type Entry = [key: string, value: any];
 
 const envFile = '.env.submit';
-
-async function generateRefreshTokenViaOAuth(
-  clientId: string,
-  clientSecret: string,
-): Promise<string> {
-  let resolveCode: (code: string) => void;
-  const codePromise = new Promise<string>(resolve => (resolveCode = resolve));
-
-  const server = http.createServer((req, res) => {
-    const url = new URL(req.url || '', `http://localhost`);
-    const code = url.searchParams.get('code');
-    if (code) {
-      resolveCode(code);
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(
-        'Success! You can close this tab. <script>window.close()</script>',
-      );
-      server.close();
-    } else {
-      res.writeHead(400);
-      res.end('No code found');
-    }
-  });
-
-  server.listen(0, () => {
-    const port = (server.address() as any).port;
-    const redirectUri = `http://127.0.0.1:${port}`;
-
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
-    authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('access_type', 'offline');
-    authUrl.searchParams.set('client_id', clientId);
-    authUrl.searchParams.set(
-      'scope',
-      'https://www.googleapis.com/auth/chromewebstore',
-    );
-    authUrl.searchParams.set('redirect_uri', redirectUri);
-
-    console.log('Open this URL in your browser to authorize:');
-    console.log(authUrl.href);
-  });
-
-  const code = await codePromise;
-
-  const res = await fetch('https://accounts.google.com/o/oauth2/token', {
-    method: 'POST',
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-      grant_type: 'authorization_code',
-      redirect_uri: `http://127.0.0.1:${(server.address() as any).port}`,
-    }),
-  });
-
-  const data: any = await res.json();
-  return data.refresh_token;
-}
 
 export async function init(config: InlineConfig) {
   consola.info(`Initialize or update an existing \`${envFile}\` file.`);
@@ -182,10 +124,27 @@ async function initChrome(
     { type: 'confirm' },
   );
   if (generateRefreshToken) {
-    const refreshToken = await generateRefreshTokenViaOAuth(
-      clientId,
-      clientSecret,
+    const authCodeUrl = `https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&client_id=${clientId}&redirect_uri=urn:ietf:wg:oauth:2.0:oob`;
+    consola.log(authCodeUrl);
+    const authCode = await consola.prompt(
+      'Open the above URL, login, and enter the auth code:',
+      {
+        type: 'text',
+        required: true,
+      },
     );
+    const data = new URLSearchParams();
+    data.set('client_id', clientId);
+    data.set('client_secret', clientSecret);
+    data.set('code', authCode);
+    data.set('grant_type', 'authorization_code');
+    data.set('redirect_uri', 'urn:ietf:wg:oauth:2.0:oob');
+    const tokenUrl = `https://accounts.google.com/o/oauth2/token`;
+    const res = await ofetch<{ refresh_token: string }>(tokenUrl, {
+      method: 'POST',
+      body: data,
+    });
+    const refreshToken = res.refresh_token;
     consola.info(`Refresh token: \`${refreshToken}\``);
     entries.push(['CHROME_REFRESH_TOKEN', refreshToken]);
   }

@@ -1,3 +1,4 @@
+import { fileFromPath } from 'formdata-node/file-from-path';
 import { fetch } from '../utils/fetch';
 
 export interface CwsApiOptions {
@@ -102,11 +103,14 @@ export class CwsApi {
   }): Promise<UploadItemPackageResponse> {
     const Authorization = this.getAuthHeader(params.token);
 
+    const form = new FormData();
+    const file = await fileFromPath(params.zipFile);
+    form.append('image', file as unknown as Blob);
     return fetch<UploadItemPackageResponse>(
       this.uploadEndpoint(params.extensionId),
       {
         method: 'POST',
-        body: Bun.file(params.zipFile),
+        body: form,
         headers: {
           Authorization,
           'X-Goog-Upload-Protocol': 'raw',

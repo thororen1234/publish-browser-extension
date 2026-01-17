@@ -53,11 +53,14 @@ publishExtension({
   chrome: {
     zip: 'dist/chrome.zip',
     extensionId: '<cws-extension-id>',
+    chromePublisherId: '<cws-publisher-id>',
     clientId: '<gcp-client-id>',
     clientSecret: '<gcp-client-secret>',
     refreshToken: '<gcp-refresh-token>',
-    publishTarget: '<default|trustedTesters>',
     skipSubmitReview: false,
+    cancelPending: false,
+    skipReview: false,
+    publishType: false,
   },
   firefox: {
     zip: 'dist/firefox.zip',

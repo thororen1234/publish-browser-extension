@@ -4,7 +4,7 @@ import { copyFile, writeFile, readFile } from 'node:fs/promises';
 import { ChromeWebStoreOptions } from './chrome';
 import { FirefoxAddonStoreOptions } from './firefox';
 import { EdgeAddonStoreOptions } from './edge';
-import { ofetch } from 'ofetch';
+import http from 'http';
 
 type Entry = [key: string, value: any];
 
@@ -14,66 +14,58 @@ async function generateRefreshTokenViaOAuth(
   clientId: string,
   clientSecret: string,
 ): Promise<string> {
-  // Create deferred promise for auth code
   let resolveCode: (code: string) => void;
-  const codePromise = new Promise<string>(resolve => {
-    resolveCode = resolve;
+  const codePromise = new Promise<string>(resolve => (resolveCode = resolve));
+
+  const server = http.createServer((req, res) => {
+    const url = new URL(req.url || '', `http://localhost`);
+    const code = url.searchParams.get('code');
+    if (code) {
+      resolveCode(code);
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(
+        'Success! You can close this tab. <script>window.close()</script>',
+      );
+      server.close();
+    } else {
+      res.writeHead(400);
+      res.end('No code found');
+    }
   });
 
-  // Start local server to capture OAuth callback
-  const server = Bun.serve({
-    port: 0, // Auto-assign available port
-    fetch(req) {
-      const url = new URL(req.url);
-      const code = url.searchParams.get('code');
-      if (code) {
-        resolveCode(code);
-        return new Response(
-          'Success! You can close this tab. <script>window.close()</script>',
-          { headers: { 'Content-Type': 'text/html' } },
-        );
-      }
-      return new Response('No code found', { status: 400 });
-    },
+  server.listen(0, () => {
+    const port = (server.address() as any).port;
+    const redirectUri = `http://127.0.0.1:${port}`;
+
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('access_type', 'offline');
+    authUrl.searchParams.set('client_id', clientId);
+    authUrl.searchParams.set(
+      'scope',
+      'https://www.googleapis.com/auth/chromewebstore',
+    );
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+
+    console.log('Open this URL in your browser to authorize:');
+    console.log(authUrl.href);
   });
 
-  const serverUrl = `http://127.0.0.1:${server.port}`;
-
-  // Build OAuth URL
-  const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
-  authUrl.searchParams.set('response_type', 'code');
-  authUrl.searchParams.set('access_type', 'offline');
-  authUrl.searchParams.set('client_id', clientId);
-  authUrl.searchParams.set(
-    'scope',
-    'https://www.googleapis.com/auth/chromewebstore',
-  );
-  authUrl.searchParams.set('redirect_uri', serverUrl);
-
-  consola.info('Open this URL in your browser to authorize:');
-  consola.log(authUrl.href);
-  consola.info('Waiting for authorization...');
-
-  // Wait for auth code from callback
   const code = await codePromise;
-  server.stop();
 
-  // Exchange code for refresh token
-  const res = await ofetch<{ refresh_token: string }>(
-    'https://accounts.google.com/o/oauth2/token',
-    {
-      method: 'POST',
-      body: new URLSearchParams([
-        ['client_id', clientId],
-        ['client_secret', clientSecret],
-        ['code', code],
-        ['grant_type', 'authorization_code'],
-        ['redirect_uri', serverUrl],
-      ]),
-    },
-  );
+  const res = await fetch('https://accounts.google.com/o/oauth2/token', {
+    method: 'POST',
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: `http://127.0.0.1:${(server.address() as any).port}`,
+    }),
+  });
 
-  return res.refresh_token;
+  const data: any = await res.json();
+  return data.refresh_token;
 }
 
 export async function init(config: InlineConfig) {

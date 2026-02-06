@@ -1,5 +1,34 @@
 # Changelog
 
+## v4.0.1
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.0...v4.0.1)
+
+### 🩹 Fixes
+
+- **firefox:** Remove unnecessary brackets ([#52](https://github.com/aklinker1/publish-browser-extension/pull/52))
+- **Edge:** Catch errors instead of checking response.ok ([#54](https://github.com/aklinker1/publish-browser-extension/pull/54))
+- Strip curly braces from firefox URL if present ([#56](https://github.com/aklinker1/publish-browser-extension/pull/56))
+- Add missing import for `publish-web-extension/cli` for WXT #2076 ([#2076](https://github.com/aklinker1/publish-browser-extension/issues/2076))
+
+### 📖 Documentation
+
+- Update contributor setup to use bun ([#49](https://github.com/aklinker1/publish-browser-extension/pull/49))
+
+### 🏡 Chore
+
+- Add back `engines` to package.json ([735e152](https://github.com/aklinker1/publish-browser-extension/commit/735e152))
+- Update checks ([f1f735e](https://github.com/aklinker1/publish-browser-extension/commit/f1f735e))
+- Remove tsup dev dep ([d41ff0f](https://github.com/aklinker1/publish-browser-extension/commit/d41ff0f))
+- Load env vars from `.env.submit` in scripts ([783c8d2](https://github.com/aklinker1/publish-browser-extension/commit/783c8d2))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+- Sachit Vithaldas ([@sachitv](https://github.com/sachitv))
+- Julien <julienconstant190@gmail.com>
+- MengXi <z1219202167@outlook.com>
+
 ## v4.0.0
 
 [compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v3.0.3...v4.0.0)

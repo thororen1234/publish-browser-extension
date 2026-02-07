@@ -17,7 +17,7 @@ export async function init(config: InlineConfig) {
 
   // Types are wrong? This actually returns a Promise<string[]>
   const stores = await prompt<string[]>(
-    'What stores do you want to configure?',
+    'What stores do you want to configure? \x1b[2m(use ↑/↓ and space to select)\x1b[0m',
     {
       type: 'multiselect',
       options: [
@@ -28,6 +28,10 @@ export async function init(config: InlineConfig) {
       required: true,
     },
   );
+  if (!stores?.length) {
+    consola.warn('No stores selected, exiting without making any changes.');
+    process.exit(1);
+  }
 
   const replacements: Entry[] = [];
   if (stores?.includes('chrome')) {

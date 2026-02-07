@@ -1,5 +1,17 @@
 # Changelog
 
+## v4.0.2
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.1...v4.0.2)
+
+### 🩹 Fixes
+
+- **init:** Improve UX when not selecting a store ([#57](https://github.com/aklinker1/publish-browser-extension/pull/57))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
 ## v4.0.1
 
 [compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.0...v4.0.1)

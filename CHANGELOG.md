@@ -1,5 +1,19 @@
 # Changelog
 
+## v4.0.3
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.2...v4.0.3)
+
+### 🤖 CI
+
+- Add pkg.pr.new to test unreleased commits and PRs ([d9bf2ec](https://github.com/aklinker1/publish-browser-extension/commit/d9bf2ec))
+- Rename workflow ([654df5e](https://github.com/aklinker1/publish-browser-extension/commit/654df5e))
+- Rename job ([cc63e3e](https://github.com/aklinker1/publish-browser-extension/commit/cc63e3e))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
 ## v4.0.2
 
 [compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.1...v4.0.2)

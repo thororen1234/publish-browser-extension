@@ -1,5 +1,24 @@
 # Changelog
 
+## v4.0.4
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.3...v4.0.4)
+
+### 🩹 Fixes
+
+- Better typings & make windows development available ([#60](https://github.com/aklinker1/publish-browser-extension/pull/60))
+- Use `default` instead of `import` for bundler exports ([08feb89](https://github.com/aklinker1/publish-browser-extension/commit/08feb89))
+
+### 🤖 CI
+
+- Enable CI on PRs ([b27d581](https://github.com/aklinker1/publish-browser-extension/commit/b27d581))
+- Fix validation workflow ([49796be](https://github.com/aklinker1/publish-browser-extension/commit/49796be))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+- Julien <julienconstant190@gmail.com>
+
 ## v4.0.3
 
 [compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.2...v4.0.3)

@@ -82,10 +82,10 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
+      "default": "./dist/index.mjs"
     },
     "./cli": {
-      "import": "./dist/cli.mjs"
+      "default": "./dist/cli.mjs"
     }
   },
   "engines": {

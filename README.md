@@ -53,7 +53,7 @@ publishExtension({
   chrome: {
     zip: 'dist/chrome.zip',
     extensionId: '<cws-extension-id>',
-    chromePublisherId: '<cws-publisher-id>',
+    publisherId: '<cws-publisher-id>',
     clientId: '<gcp-client-id>',
     clientSecret: '<gcp-client-secret>',
     refreshToken: '<gcp-refresh-token>',

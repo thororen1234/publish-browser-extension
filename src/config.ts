@@ -155,7 +155,7 @@ export const InternalConfig = z.object({
 });
 export type InternalConfig = z.infer<typeof InternalConfig>;
 
-interface CustomEnv {
+export interface CustomEnv {
   DRY_RUN: string | undefined;
 
   CHROME_ZIP: string | undefined;

@@ -1,6 +1,6 @@
 name: Validate
 on:
-  pull_request:
+  pull_request_target:
   workflow_call:
   workflow_dispatch:
   push:
@@ -21,12 +21,10 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-24.04
-    # If PR is from a fork, secrets aren't available, so skip this job.
-    if: github.event.pull_request.head.repo.fork != true
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup
-      - run: ./scripts/dev.sh all
+      - run: bun ./scripts/dev.mjs all
         env:
           CHROME_EXTENSION_ID: ${{ secrets.TEST_CHROME_EXTENSION_ID }}
           CHROME_PUBLISHER_ID: ${{ secrets.TEST_CHROME_PUBLISHER_ID }}

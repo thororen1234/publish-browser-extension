@@ -1,12 +1,12 @@
 import { consola } from 'consola';
-import { InlineConfig, resolveConfig } from './config';
+import { InlineConfig, resolveConfig, type CustomEnv } from './config';
 import { copyFile, writeFile, readFile } from 'node:fs/promises';
 import { ChromeWebStoreOptions } from './chrome';
 import { FirefoxAddonStoreOptions } from './firefox';
 import { EdgeAddonStoreOptions } from './edge';
 import { ofetch } from 'ofetch';
 
-type Entry = [key: string, value: any];
+type Entry = [key: keyof CustomEnv, value: string | number | boolean];
 
 const envFile = '.env.submit';
 
@@ -17,7 +17,7 @@ export async function init(config: InlineConfig) {
 
   // Types are wrong? This actually returns a Promise<string[]>
   const stores = await prompt<string[]>(
-    'What stores do you want to configure?',
+    'What stores do you want to configure? \x1b[2m(use ↑/↓ and space to select)\x1b[0m',
     {
       type: 'multiselect',
       options: [
@@ -28,6 +28,10 @@ export async function init(config: InlineConfig) {
       required: true,
     },
   );
+  if (!stores?.length) {
+    consola.warn('No stores selected, exiting without making any changes.');
+    process.exit(1);
+  }
 
   const replacements: Entry[] = [];
   if (stores?.includes('chrome')) {
@@ -50,7 +54,7 @@ export async function init(config: InlineConfig) {
 async function prompt<T>(
   message: Parameters<typeof consola.prompt>[0],
   options: Parameters<typeof consola.prompt>[1],
-  previousValue?: any,
+  previousValue?: string,
 ): Promise<T> {
   let result = await consola.prompt(message, {
     default: previousValue,
@@ -152,7 +156,7 @@ async function initChrome(
   const submitForReview = await prompt<boolean>(
     'When uploading, automatically submit new update for review?',
     { type: 'confirm' },
-    !previousOptions?.skipSubmitReview,
+    String(!previousOptions?.skipSubmitReview),
   );
   entries.push(['CHROME_SKIP_SUBMIT_REVIEW', !submitForReview]);
 
@@ -171,7 +175,7 @@ async function initFirefox(
     'Your `--firefox-extension-id` is listed at the bottom of the details page on:',
   );
   console.log('https://addons.mozilla.org/en-US/developers/');
-  const extensionId = await prompt(
+  const extensionId = await prompt<string>(
     'Enter extension ID:',
     {
       type: 'text',
@@ -231,7 +235,7 @@ async function initEdge(
     'Your `--edge-product-id` is listed On the developer dashboard, at the top of the page under the extension name',
   );
   console.log('https://partner.microsoft.com/dashboard/microsoftedge/overview');
-  const productId = await prompt(
+  const productId = await prompt<string>(
     'Enter product ID:',
     {
       type: 'text',
@@ -264,7 +268,7 @@ async function initEdge(
   const submitForReview = await prompt<boolean>(
     'When uploading, automatically submit new update for review?',
     { type: 'confirm' },
-    !previousOptions?.skipSubmitReview,
+    String(!previousOptions?.skipSubmitReview),
   );
   entries.push(['EDGE_SKIP_SUBMIT_REVIEW', !submitForReview]);
 

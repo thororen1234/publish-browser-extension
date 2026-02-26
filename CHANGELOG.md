@@ -1,5 +1,79 @@
 # Changelog
 
+## v4.0.4
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.3...v4.0.4)
+
+### 🩹 Fixes
+
+- Better typings & make windows development available ([#60](https://github.com/aklinker1/publish-browser-extension/pull/60))
+- Use `default` instead of `import` for bundler exports ([08feb89](https://github.com/aklinker1/publish-browser-extension/commit/08feb89))
+
+### 🤖 CI
+
+- Enable CI on PRs ([b27d581](https://github.com/aklinker1/publish-browser-extension/commit/b27d581))
+- Fix validation workflow ([49796be](https://github.com/aklinker1/publish-browser-extension/commit/49796be))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+- Julien <julienconstant190@gmail.com>
+
+## v4.0.3
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.2...v4.0.3)
+
+### 🤖 CI
+
+- Add pkg.pr.new to test unreleased commits and PRs ([d9bf2ec](https://github.com/aklinker1/publish-browser-extension/commit/d9bf2ec))
+- Rename workflow ([654df5e](https://github.com/aklinker1/publish-browser-extension/commit/654df5e))
+- Rename job ([cc63e3e](https://github.com/aklinker1/publish-browser-extension/commit/cc63e3e))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
+## v4.0.2
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.1...v4.0.2)
+
+### 🩹 Fixes
+
+- **init:** Improve UX when not selecting a store ([#57](https://github.com/aklinker1/publish-browser-extension/pull/57))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
+## v4.0.1
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.0...v4.0.1)
+
+### 🩹 Fixes
+
+- **firefox:** Remove unnecessary brackets ([#52](https://github.com/aklinker1/publish-browser-extension/pull/52))
+- **Edge:** Catch errors instead of checking response.ok ([#54](https://github.com/aklinker1/publish-browser-extension/pull/54))
+- Strip curly braces from firefox URL if present ([#56](https://github.com/aklinker1/publish-browser-extension/pull/56))
+- Add missing import for `publish-web-extension/cli` for WXT #2076 ([#2076](https://github.com/aklinker1/publish-browser-extension/issues/2076))
+
+### 📖 Documentation
+
+- Update contributor setup to use bun ([#49](https://github.com/aklinker1/publish-browser-extension/pull/49))
+
+### 🏡 Chore
+
+- Add back `engines` to package.json ([735e152](https://github.com/aklinker1/publish-browser-extension/commit/735e152))
+- Update checks ([f1f735e](https://github.com/aklinker1/publish-browser-extension/commit/f1f735e))
+- Remove tsup dev dep ([d41ff0f](https://github.com/aklinker1/publish-browser-extension/commit/d41ff0f))
+- Load env vars from `.env.submit` in scripts ([783c8d2](https://github.com/aklinker1/publish-browser-extension/commit/783c8d2))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+- Sachit Vithaldas ([@sachitv](https://github.com/sachitv))
+- Julien <julienconstant190@gmail.com>
+- MengXi <z1219202167@outlook.com>
+
 ## v4.0.0
 
 [compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v3.0.3...v4.0.0)

@@ -1,5 +1,8 @@
 import { consola } from 'consola';
 import { AddonsApi } from '../src/firefox/firefox-api';
+import { config } from 'dotenv';
+
+config({ path: '.env.submit', quiet: true });
 
 // This file is used to generate a token for Insomnia/Postman
 // bun generate-firefox-token

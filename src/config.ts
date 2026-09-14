@@ -1,195 +1,102 @@
-import { z } from 'zod/v4';
-import { ChromeWebStoreOptions } from './chrome';
-import { EdgeAddonStoreOptions } from './edge';
-import { FirefoxAddonStoreOptions } from './firefox';
-import type { DeepPartial } from './utils/types';
+import { Struct, StructError, validate } from 'superstruct';
+import {
+  PartialResolvedConfig,
+  type InlineConfig,
+  ResolvedConfig,
+} from './utils/config-schema';
+import { highlight } from './utils/logger';
+
+export type {
+  AllChromeOptions,
+  ChromeWebStoreV1_1Options,
+  ChromeWebStoreV2Options,
+  EdgeAddonStoreV1_1Options,
+  FirefoxAddonStoreV5Options,
+  InlineConfig,
+  OperaAddonsStoreOptions,
+  ResolvedConfig,
+} from './utils/config-schema';
+
+/// gen-start:config-resolver
+// prettier-ignore
+/**
+ * Given inline config, read environment variables and apply defaults.
+ * The return value is a deep partial of the ResolvedConfig type - call
+ * `validateConfig` to make sure all required options are passed
+ */
+export function resolveConfig(config?: InlineConfig): PartialResolvedConfig {
+  const raw: Record<string, any> = {}
+
+  // Init store objects
+  const chromeZip = (config as any)?.chrome?.zip ?? process.env.CHROME_ZIP
+  const edgeZip = (config as any)?.edge?.zip ?? process.env.EDGE_ZIP
+  const firefoxZip = (config as any)?.firefox?.zip ?? process.env.FIREFOX_ZIP
+  const operaZip = (config as any)?.opera?.zip ?? process.env.OPERA_ZIP
+
+  if (chromeZip) raw.chrome ??= {}
+  if (edgeZip) raw.edge ??= {}
+  if (firefoxZip) raw.firefox ??= {}
+  if (operaZip) raw.opera ??= {}
+
+  // Set values
+  raw.dryRun = (config as any)?.dryRun ?? process.env.DRY_RUN
+  if (raw.chrome) raw.chrome.apiVersion = (config as any)?.chrome?.apiVersion ?? process.env.CHROME_API_VERSION
+  if (raw.chrome) raw.chrome.deployPercentage = (config as any)?.chrome?.deployPercentage ?? process.env.CHROME_DEPLOY_PERCENTAGE
+  if (raw.chrome) raw.chrome.extensionId = (config as any)?.chrome?.extensionId ?? process.env.CHROME_EXTENSION_ID
+  if (raw.chrome) raw.chrome.skipSubmitReview = (config as any)?.chrome?.skipSubmitReview ?? process.env.CHROME_SKIP_SUBMIT_REVIEW
+  if (raw.chrome) raw.chrome.zip = (config as any)?.chrome?.zip ?? process.env.CHROME_ZIP
+  if (raw.chrome) raw.chrome.cancelPending = (config as any)?.chrome?.cancelPending ?? process.env.CHROME_CANCEL_PENDING
+  if (raw.chrome) raw.chrome.publisherId = (config as any)?.chrome?.publisherId ?? process.env.CHROME_PUBLISHER_ID
+  if (raw.chrome) raw.chrome.publishType = (config as any)?.chrome?.publishType ?? process.env.CHROME_PUBLISH_TYPE
+  if (raw.chrome) raw.chrome.serviceAccountClientEmail = (config as any)?.chrome?.serviceAccountClientEmail ?? process.env.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL
+  if (raw.chrome) raw.chrome.serviceAccountPrivateKey = (config as any)?.chrome?.serviceAccountPrivateKey ?? process.env.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY
+  if (raw.chrome) raw.chrome.skipReview = (config as any)?.chrome?.skipReview ?? process.env.CHROME_SKIP_REVIEW
+  if (raw.chrome) raw.chrome.clientId = (config as any)?.chrome?.clientId ?? process.env.CHROME_CLIENT_ID
+  if (raw.chrome) raw.chrome.clientSecret = (config as any)?.chrome?.clientSecret ?? process.env.CHROME_CLIENT_SECRET
+  if (raw.chrome) raw.chrome.publishTarget = (config as any)?.chrome?.publishTarget ?? process.env.CHROME_PUBLISH_TARGET
+  if (raw.chrome) raw.chrome.refreshToken = (config as any)?.chrome?.refreshToken ?? process.env.CHROME_REFRESH_TOKEN
+  if (raw.chrome) raw.chrome.reviewExemption = (config as any)?.chrome?.reviewExemption ?? process.env.CHROME_REVIEW_EXEMPTION
+  if (raw.edge) raw.edge.apiKey = (config as any)?.edge?.apiKey ?? process.env.EDGE_API_KEY
+  if (raw.edge) raw.edge.clientId = (config as any)?.edge?.clientId ?? process.env.EDGE_CLIENT_ID
+  if (raw.edge) raw.edge.productId = (config as any)?.edge?.productId ?? process.env.EDGE_PRODUCT_ID
+  if (raw.edge) raw.edge.skipSubmitReview = (config as any)?.edge?.skipSubmitReview ?? process.env.EDGE_SKIP_SUBMIT_REVIEW
+  if (raw.edge) raw.edge.zip = (config as any)?.edge?.zip ?? process.env.EDGE_ZIP
+  if (raw.firefox) raw.firefox.amoMetadataFile = (config as any)?.firefox?.amoMetadataFile ?? process.env.FIREFOX_AMO_METADATA_FILE
+  if (raw.firefox) raw.firefox.channel = (config as any)?.firefox?.channel ?? process.env.FIREFOX_CHANNEL
+  if (raw.firefox) raw.firefox.compatibility = (config as any)?.firefox?.compatibility ?? process.env.FIREFOX_COMPATIBILITY
+  if (raw.firefox) raw.firefox.extensionId = (config as any)?.firefox?.extensionId ?? process.env.FIREFOX_EXTENSION_ID
+  if (raw.firefox) raw.firefox.jwtIssuer = (config as any)?.firefox?.jwtIssuer ?? process.env.FIREFOX_JWT_ISSUER
+  if (raw.firefox) raw.firefox.jwtSecret = (config as any)?.firefox?.jwtSecret ?? process.env.FIREFOX_JWT_SECRET
+  if (raw.firefox) raw.firefox.skipSubmitReview = (config as any)?.firefox?.skipSubmitReview ?? process.env.FIREFOX_SKIP_SUBMIT_REVIEW
+  if (raw.firefox) raw.firefox.sourcesZip = (config as any)?.firefox?.sourcesZip ?? process.env.FIREFOX_SOURCES_ZIP
+  if (raw.firefox) raw.firefox.zip = (config as any)?.firefox?.zip ?? process.env.FIREFOX_ZIP
+  if (raw.opera) raw.opera.packageId = (config as any)?.opera?.packageId ?? process.env.OPERA_PACKAGE_ID
+  if (raw.opera) raw.opera.sessionId = (config as any)?.opera?.sessionId ?? process.env.OPERA_SESSION_ID
+  if (raw.opera) raw.opera.skipSubmitReview = (config as any)?.opera?.skipSubmitReview ?? process.env.OPERA_SKIP_SUBMIT_REVIEW
+  if (raw.opera) raw.opera.zip = (config as any)?.opera?.zip ?? process.env.OPERA_ZIP
+
+  return validateConfigWith(raw, PartialResolvedConfig);
+}
+/// gen-end:config-resolver
 
 /**
- * Given inline config, read environment variables and apply defaults. Throws an error if any config
- * is missing.
+ * Validate if an object matches `ResolvedConfig`, throwing an error if it is
+ * invalid.
  */
-export function resolveConfig(
-  config: InlineConfig,
-): DeepPartial<InternalConfig> {
-  const dryRun = config.dryRun ?? booleanEnv('DRY_RUN') ?? false;
-
-  const chromeZip = config.chrome?.zip ?? stringEnv('CHROME_ZIP');
-  const firefoxZip = config.firefox?.zip ?? stringEnv('FIREFOX_ZIP');
-  const edgeZip = config.edge?.zip ?? stringEnv('EDGE_ZIP');
-
-  return {
-    dryRun,
-    chrome:
-      chromeZip == null
-        ? undefined
-        : {
-            zip: chromeZip,
-            extensionId:
-              config.chrome?.extensionId ?? stringEnv('CHROME_EXTENSION_ID'),
-            publisherId:
-              config.chrome?.publisherId ?? stringEnv('CHROME_PUBLISHER_ID'),
-            clientId: config.chrome?.clientId ?? stringEnv('CHROME_CLIENT_ID'),
-            clientSecret:
-              config.chrome?.clientSecret ?? stringEnv('CHROME_CLIENT_SECRET'),
-            refreshToken:
-              config.chrome?.refreshToken ?? stringEnv('CHROME_REFRESH_TOKEN'),
-            deployPercentage:
-              config.chrome?.deployPercentage ??
-              intEnv('CHROME_DEPLOY_PERCENTAGE'),
-            skipSubmitReview:
-              config.chrome?.skipSubmitReview ??
-              booleanEnv('CHROME_SKIP_SUBMIT_REVIEW') ??
-              false,
-            cancelPending:
-              config.chrome?.cancelPending ??
-              booleanEnv('CHROME_CANCEL_PENDING') ??
-              false,
-            skipReview:
-              config.chrome?.skipReview ??
-              booleanEnv('CHROME_SKIP_REVIEW') ??
-              false,
-            publishType:
-              config.chrome?.publishType ??
-              stringEnv('CHROME_PUBLISH_TYPE') ??
-              'DEFAULT_PUBLISH',
-          },
-    firefox:
-      firefoxZip == null
-        ? undefined
-        : {
-            zip: firefoxZip,
-            sourcesZip:
-              config.firefox?.sourcesZip ?? stringEnv('FIREFOX_SOURCES_ZIP'),
-            extensionId:
-              config.firefox?.extensionId ?? stringEnv('FIREFOX_EXTENSION_ID'),
-            jwtIssuer:
-              config.firefox?.jwtIssuer ?? stringEnv('FIREFOX_JWT_ISSUER'),
-            jwtSecret:
-              config.firefox?.jwtSecret ?? stringEnv('FIREFOX_JWT_SECRET'),
-            channel:
-              config.firefox?.channel ??
-              stringEnv('FIREFOX_CHANNEL') ??
-              'listed',
-          },
-    edge:
-      edgeZip == null
-        ? undefined
-        : {
-            zip: edgeZip,
-            productId: config.edge?.productId ?? stringEnv('EDGE_PRODUCT_ID'),
-            clientId: config.edge?.clientId ?? stringEnv('EDGE_CLIENT_ID'),
-            apiKey: config.edge?.apiKey ?? stringEnv('EDGE_API_KEY'),
-            clientSecret:
-              config.edge?.clientSecret ?? stringEnv('EDGE_CLIENT_SECRET'),
-            accessTokenUrl:
-              config.edge?.accessTokenUrl ?? stringEnv('EDGE_ACCESS_TOKEN_URL'),
-            skipSubmitReview:
-              config.edge?.skipSubmitReview ??
-              booleanEnv('EDGE_SKIP_SUBMIT_REVIEW') ??
-              false,
-          },
-  };
+export function validateConfig(config: any): ResolvedConfig {
+  return validateConfigWith(config, ResolvedConfig);
 }
 
-function toScreamingSnakeCase(str: string): string {
-  return str
-    .replace(/([A-Z])/g, '_$1')
-    .replace(/-/g, '_')
-    .toUpperCase();
-}
+function validateConfigWith<T>(config: any, schema: Struct<T>): T {
+  const res = validate(config, schema, { coerce: true, mask: true });
+  if (res[1] != null) return res[1];
 
-export function validateConfig(config: any): InternalConfig {
-  const result = InternalConfig.safeParse(config);
-
-  if (!result.success) {
-    throw Error(
-      'Missing required config: ' +
-        result.error.issues
-          .map(i => i.path.map(j => toScreamingSnakeCase(String(j))).join('_'))
-          .join(', '),
-      { cause: result.error },
-    );
-  }
-  return result.data;
-}
-
-function booleanEnv(name: keyof CustomEnv): boolean | undefined {
-  return !process.env[name] ? undefined : process.env[name] === 'true';
-}
-
-function stringEnv<T extends string = string>(
-  name: keyof CustomEnv,
-): T | undefined {
-  return !process.env[name] ? undefined : (process.env[name] as T);
-}
-
-function intEnv(name: keyof CustomEnv): number | undefined {
-  return !process.env[name] ? undefined : parseInt(process.env[name]!);
-}
-
-export const InlineConfig = z.object({
-  /**
-   * When true, just check authentication, don't upload any zip files or submit any updates.
-   */
-  dryRun: z.boolean().optional(),
-  /**
-   * Options for publishing to chrome.
-   */
-  chrome: ChromeWebStoreOptions.partial().optional(),
-  /**
-   * Options for publishing to Firefox.
-   */
-  firefox: FirefoxAddonStoreOptions.partial().optional(),
-  /**
-   * Options for publishing to Edge.
-   */
-  edge: EdgeAddonStoreOptions.partial().optional(),
-});
-export type InlineConfig = z.infer<typeof InlineConfig>;
-
-export const InternalConfig = z.object({
-  dryRun: z.boolean(),
-  chrome: ChromeWebStoreOptions.optional(),
-  firefox: FirefoxAddonStoreOptions.optional(),
-  edge: EdgeAddonStoreOptions.optional(),
-});
-export type InternalConfig = z.infer<typeof InternalConfig>;
-
-export interface CustomEnv {
-  DRY_RUN: string | undefined;
-
-  CHROME_ZIP: string | undefined;
-  CHROME_EXTENSION_ID: string | undefined;
-  CHROME_PUBLISHER_ID: string | undefined;
-  CHROME_CLIENT_ID: string | undefined;
-  CHROME_CLIENT_SECRET: string | undefined;
-  CHROME_REFRESH_TOKEN: string | undefined;
-  CHROME_DEPLOY_PERCENTAGE: string | undefined;
-  CHROME_SKIP_SUBMIT_REVIEW: string | undefined;
-  CHROME_CANCEL_PENDING: string | undefined;
-  CHROME_SKIP_REVIEW: string | undefined;
-  CHROME_PUBLISH_TYPE: string | undefined;
-
-  FIREFOX_ZIP: string | undefined;
-  FIREFOX_SOURCES_ZIP: string | undefined;
-  FIREFOX_EXTENSION_ID: string | undefined;
-  FIREFOX_JWT_ISSUER: string | undefined;
-  FIREFOX_JWT_SECRET: string | undefined;
-  FIREFOX_CHANNEL: string | undefined;
-
-  EDGE_ZIP: string | undefined;
-  EDGE_PRODUCT_ID: string | undefined;
-  EDGE_CLIENT_ID: string | undefined;
-  /** @deprecated since Edge API v1.1 release */
-  EDGE_CLIENT_SECRET: string | undefined;
-  /** @deprecated since Edge API v1.1 release */
-  EDGE_ACCESS_TOKEN_URL: string | undefined;
-  EDGE_API_KEY: string | undefined;
-  EDGE_SKIP_SUBMIT_REVIEW: string | undefined;
-}
-
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv extends CustomEnv {}
-  }
+  throw Error(
+    [
+      'Invalid config:',
+      ...(res[0] as StructError)
+        .failures()
+        .map(err => `  - ${highlight(err.path.join('.'))}: ${err.message}`),
+    ].join('\n'),
+  );
 }

@@ -1,5 +1,150 @@
 # Changelog
 
+## v6.1.1
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v6.1.0...v6.1.1)
+
+### 🩹 Fixes
+
+- **init:** Better handling of newline chars in CWS private key ([#92](https://github.com/aklinker1/publish-browser-extension/pull/92))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
+## v6.1.0
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v6.0.0...v6.1.0)
+
+### 🚀 Enhancements
+
+- Support Firefox AMO metadata ([#88](https://github.com/aklinker1/publish-browser-extension/pull/88))
+
+### 🩹 Fixes
+
+- **firefox:** Include filename in zip uploads ([#91](https://github.com/aklinker1/publish-browser-extension/pull/91))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+- Guflly ([@Guflly](https://github.com/Guflly))
+
+## v6.0.0
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v5.1.0...v6.0.0)
+
+### 🩹 Fixes
+
+- Drop `consola` for DIY logger and `@topcli/prompts`, handle newlines in env variables correctly ([#84](https://github.com/aklinker1/publish-browser-extension/pull/84))
+- ⚠️ Drop node 20 support, support >=22 ([4ab4d83](https://github.com/aklinker1/publish-browser-extension/commit/4ab4d83))
+
+### 🏡 Chore
+
+- Replace `dotenv` with node built-ins ([#80](https://github.com/aklinker1/publish-browser-extension/pull/80))
+- Drop `formdata-node` and `form-data-encoder` ([#86](https://github.com/aklinker1/publish-browser-extension/pull/86))
+- Remove namespaces from API definitions to reduce bundled types size ([1ada2dd](https://github.com/aklinker1/publish-browser-extension/commit/1ada2dd))
+- Remove deprecated, non-versioned store types and classes ([c2f7ab3](https://github.com/aklinker1/publish-browser-extension/commit/c2f7ab3))
+
+### 🤖 CI
+
+- Run tests against multiple versions of node ([30c8e1c](https://github.com/aklinker1/publish-browser-extension/commit/30c8e1c))
+- Actually install different node versions ([4ced7e2](https://github.com/aklinker1/publish-browser-extension/commit/4ced7e2))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Drop node 20 support, support >=22 ([4ab4d83](https://github.com/aklinker1/publish-browser-extension/commit/4ab4d83))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
+## v5.1.0
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v5.0.0...v5.1.0)
+
+### 🚀 Enhancements
+
+- Add support for `firefox.skipSubmitReview` ([6f4d889](https://github.com/aklinker1/publish-browser-extension/commit/6f4d889))
+
+### 🩹 Fixes
+
+- Refactor config validation using code generation and `superstruct` ([#77](https://github.com/aklinker1/publish-browser-extension/pull/77))
+- Fix init regression around config validation ([4f1b1ad](https://github.com/aklinker1/publish-browser-extension/commit/4f1b1ad))
+- Pass `duplex: half` when uploading streams ([010f94e](https://github.com/aklinker1/publish-browser-extension/commit/010f94e))
+
+### 💅 Refactors
+
+- Refactor opera API client ([#78](https://github.com/aklinker1/publish-browser-extension/pull/78))
+
+### 🏡 Chore
+
+- Remove ofetch ([23f2fd7](https://github.com/aklinker1/publish-browser-extension/commit/23f2fd7))
+- Replace `listr2` with `tasuku` ([#79](https://github.com/aklinker1/publish-browser-extension/pull/79))
+
+### 🤖 CI
+
+- Run tests with node, not bun, in CI ([d2d83b0](https://github.com/aklinker1/publish-browser-extension/commit/d2d83b0))
+- Update job name ([10af132](https://github.com/aklinker1/publish-browser-extension/commit/10af132))
+- Run E2E tests for both node and bun ([2c6e267](https://github.com/aklinker1/publish-browser-extension/commit/2c6e267))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+
+## v5.0.0
+
+[compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.5...v5.0.0)
+
+**v5 includes breaking changes to the JS APIs only** - there were no breaking changes to the CLI.
+
+It also adds support for the new CWS v2 API - run `publish-extension init` or `wxt submit init` to migrate to the new API.
+
+### 🚀 Enhancements
+
+- Add Opera support ([#58](https://github.com/aklinker1/publish-browser-extension/pull/58))
+- Compatibility support for Firefox Android ([#62](https://github.com/aklinker1/publish-browser-extension/pull/62))
+- Add support for CWS API v2 ([#74](https://github.com/aklinker1/publish-browser-extension/pull/74))
+
+### 🩹 Fixes
+
+- ⚠️ Make `FirefoxApi`, `EdgeApi`, `OperaApi` internal ([38902e8](https://github.com/aklinker1/publish-browser-extension/commit/38902e8))
+- ⚠️ Remove deprecated options for edge v1 (`EDGE_CLIENT_SECRET`, `EDGE_ACCESS_TOKEN_URL`) ([bfd792d](https://github.com/aklinker1/publish-browser-extension/commit/bfd792d))
+
+### 💅 Refactors
+
+- ⚠️ Chrome API code-gen ([#71](https://github.com/aklinker1/publish-browser-extension/pull/71))
+- Move files around to match my current organization patterns ([3ffaa8e](https://github.com/aklinker1/publish-browser-extension/commit/3ffaa8e))
+- Move more files around ([d491af0](https://github.com/aklinker1/publish-browser-extension/commit/d491af0))
+- Simplify edge API setup ([270ba2a](https://github.com/aklinker1/publish-browser-extension/commit/270ba2a))
+- Simplify internal firefox APIs ([#73](https://github.com/aklinker1/publish-browser-extension/pull/73))
+- Add API versions to exports, deprecate non-versioned APIs ([78fe9d1](https://github.com/aklinker1/publish-browser-extension/commit/78fe9d1))
+
+### 🏡 Chore
+
+- Fix checks ([de490c6](https://github.com/aklinker1/publish-browser-extension/commit/de490c6))
+- **cws:** Sort generate API schemas and methods for consistent ordering in generated code ([9f0a0fa](https://github.com/aklinker1/publish-browser-extension/commit/9f0a0fa))
+- Drop `jsonwebtoken` and implement `sign` function locally ([#75](https://github.com/aklinker1/publish-browser-extension/pull/75))
+- Break config object builders into functions ([7917ee3](https://github.com/aklinker1/publish-browser-extension/commit/7917ee3))
+- Remove `!` by creating an intermediate variable ([96ea71a](https://github.com/aklinker1/publish-browser-extension/commit/96ea71a))
+
+### 🤖 CI
+
+- Exclude opera from E2E tests ([3001a3e](https://github.com/aklinker1/publish-browser-extension/commit/3001a3e))
+- Re-enable firefox and edge ([c77df8c](https://github.com/aklinker1/publish-browser-extension/commit/c77df8c))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Make `FirefoxApi`, `EdgeApi`, `OperaApi` internal ([38902e8](https://github.com/aklinker1/publish-browser-extension/commit/38902e8))
+- ⚠️ Remove deprecated options for edge v1 (`EDGE_CLIENT_SECRET`, `EDGE_ACCESS_TOKEN_URL`) ([bfd792d](https://github.com/aklinker1/publish-browser-extension/commit/bfd792d))
+- ⚠️ Chrome API code-gen ([#71](https://github.com/aklinker1/publish-browser-extension/pull/71))
+
+### ❤️ Contributors
+
+- Aaron ([@aklinker1](https://github.com/aklinker1))
+- Toshs ([@toshs](https://github.com/toshs))
+- Julien <julienconstant190@gmail.com>
+- MengXi ([@mengxi-ream](https://github.com/mengxi-ream))
+
 ## v4.0.5
 
 [compare changes](https://github.com/aklinker1/publish-browser-extension/compare/v4.0.4...v4.0.5)

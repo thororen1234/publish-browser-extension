@@ -1,22 +1,29 @@
 <h1 align="center">Publish Browser Extension</h1>
 <p align="center">Publish an extension to all the extension stores in a single command!</p>
 
+<https://github.com/aklinker1/publish-browser-extension/assets/10101283/b0e856ca-4e26-4c7e-9ff8-c900e203cab5>
+
 ## Features
 
-- Publish to the **Chrome Web Store**, **Firefox Addon Store**, and **Edge Addon Store**
+- Publish to the following stores:
+  - [Chrome](https://developer.chrome.com/docs/webstore)
+  - [Edge](https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home)
+  - [Firefox](https://addons.mozilla.org/en-US/firefox/extensions/)
+  - [Opera](https://addons.opera.com/developer/)
+
 - Helper script to generate secrets and configure options
 - **Upload sources ZIP** to the Firefox Addon Store
 
 > [!IMPORTANT]
 >
-> You are responsible for uploading and submitting an extension for the first time by hand. `@equicord/publish-browser-extension` does not provide tools for creating a new extension.
+> You are responsible for uploading and submitting an extension for the first time by hand. `publish-browser-extension` does not provide tools for creating a new extension.
 
 ## Install
 
 ```sh
-npm i -D @equicord/publish-browser-extension
-pnpm i -D @equicord/publish-browser-extension
-bun i -D @equicord/publish-browser-extension
+npm i -D publish-browser-extension
+pnpm i -D publish-browser-extension
+bun i -D publish-browser-extension
 ```
 
 ## CLI Usage
@@ -35,50 +42,32 @@ Then, just run the submit command, passing the ZIP files you want to submit:
 publish-extension \
   --chrome-zip dist/chrome.zip \
   --firefox-zip dist/firefox.zip --firefox-sources-zip dist/sources.zip \
-  --edge-zip dist/chrome.zip
+  --edge-zip dist/chrome.zip \
+  --opera-zip dist/opera.zip
 ```
 
 `publish-extension` will automatically look for a `.env.submit` file and load it if it exists.
 
 ## JS Usage
 
-<!-- prettier-ignore -->
 ```js
-import { publishExtension } from '@equicord/publish-browser-extension';
+import { publishExtension } from 'publish-browser-extension';
 
-publishExtension({
-  dryRun: true,
-  chrome: {
-    zip: 'dist/chrome.zip',
-    extensionId: '<cws-extension-id>',
-    publisherId: '<cws-publisher-id>',
-    clientId: '<gcp-client-id>',
-    clientSecret: '<gcp-client-secret>',
-    refreshToken: '<gcp-refresh-token>',
-    skipSubmitReview: false,
-    cancelPending: false,
-    skipReview: false,
-    publishType: false,
-  },
-  firefox: {
-    zip: 'dist/firefox.zip',
-    sourcesZip: 'dist/sources.zip',
-    extensionId: '<addons-extension-id>',
-    jwtIssuer: '<addons-jwt-issuer>',
-    jwtSecret: '<addons-jwt-secret>',
-    channel: '<listed|unlisted>',
-  },
-  edge: {
-    zip: 'dist/chrome.zip',
-    productId: "<edge-product-id>",
-    clientId: "<edge-client-id>",
-    apiKey: "<edge-api-key>",
-    skipSubmitReview: false,
-  },
-})
-  .then(results => console.log(results))
-  .catch(err => console.error(err));
+const results = await publishExtension({
+  // ...
+});
+console.log(results);
 ```
+
+## Options
+
+Refer to the [Config Reference](./docs/config-reference.md).
+
+## Contributing
+
+<a href="https://github.com/aklinker1/publish-browser-extension/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=aklinker1/publish-browser-extension" />
+</a>
 
 ### Contributor Setup
 
@@ -106,4 +95,5 @@ publishExtension({
    bun dev:chrome
    bun dev:firefox
    bun dev:edge
+   bun dev:opera
    ```

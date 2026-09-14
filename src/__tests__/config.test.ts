@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
 import {
-  InlineConfig,
-  InternalConfig,
+  type InlineConfig,
+  type ResolvedConfig,
   resolveConfig,
   validateConfig,
-} from './config';
+} from '../config';
+import type { FirefoxAddonStoreV5Options } from '../utils/config-schema';
 
-const RESET_ENV_NAMES = /(^CHROME_|^FIREFOX_|^EDGE_|^DRY_RUN$)/;
+const RESET_ENV_NAMES = /(^CHROME_|^FIREFOX_|^EDGE_|^OPERA_|^DRY_RUN$)/;
 
 describe('resolveConfig', () => {
   beforeEach(() => {
@@ -22,17 +23,17 @@ describe('resolveConfig', () => {
     const config = {
       dryRun: true,
       chrome: {
-        zip: 'zip',
+        apiVersion: 'v2',
+        serviceAccountClientEmail: 'clientEmail',
+        serviceAccountPrivateKey: 'privateKey',
+        deployPercentage: 50,
         extensionId: 'extensionId',
         publisherId: 'publisherId',
-        clientId: 'clientId',
-        clientSecret: 'clientSecret',
-        refreshToken: 'refreshToken',
-        deployPercentage: 50,
+        publishType: 'STAGED_PUBLISH',
+        skipReview: true,
         skipSubmitReview: true,
         cancelPending: true,
-        skipReview: true,
-        publishType: 'STAGED_PUBLISH',
+        zip: 'zip',
       },
       firefox: {
         jwtIssuer: 'jwtIssuer',
@@ -41,17 +42,23 @@ describe('resolveConfig', () => {
         channel: 'unlisted',
         zip: 'zip',
         sourcesZip: 'sourcesZip',
+        amoMetadataFile: 'amoMetadataFile',
+        skipSubmitReview: true,
       },
       edge: {
         productId: 'productId',
         clientId: 'clientId',
         apiKey: 'apiKey',
-        accessTokenUrl: 'accessTokenUrl',
-        clientSecret: 'clientSecret',
         skipSubmitReview: true,
         zip: 'zip',
       },
-    } satisfies InternalConfig;
+      opera: {
+        zip: 'zip',
+        packageId: 1,
+        sessionId: 'sessionId',
+        skipSubmitReview: true,
+      },
+    } satisfies ResolvedConfig;
 
     const actual = resolveConfig(config);
 
@@ -63,70 +70,92 @@ describe('resolveConfig', () => {
     process.env.DRY_RUN = String(dryRun);
 
     process.env.CHROME_ZIP = 'CHROME_ZIP';
+    process.env.CHROME_API_VERSION = 'v2';
     process.env.CHROME_EXTENSION_ID = 'CHROME_EXTENSION_ID';
-    process.env.CHROME_PUBLISHER_ID = 'CHROME_PUBLISHER_ID';
-    process.env.CHROME_CLIENT_ID = 'CHROME_CLIENT_ID';
-    process.env.CHROME_CLIENT_SECRET = 'CHROME_CLIENT_SECRET';
-    process.env.CHROME_REFRESH_TOKEN = 'CHROME_REFRESH_TOKEN';
     const chromeSkipSubmitReview = true;
     process.env.CHROME_SKIP_SUBMIT_REVIEW = String(chromeSkipSubmitReview);
-    const chromeCancelPending = true;
-    process.env.CHROME_CANCEL_PENDING = String(chromeCancelPending);
     const chromeSkipReview = true;
     process.env.CHROME_SKIP_REVIEW = String(chromeSkipReview);
-    const chromePublishType = 'STAGED_PUBLISH';
-    process.env.CHROME_PUBLISH_TYPE = chromePublishType;
     const chromeDeployPercentage = 75;
     process.env.CHROME_DEPLOY_PERCENTAGE = String(chromeDeployPercentage);
+    process.env.CHROME_PUBLISHER_ID = 'CHROME_PUBLISHER_ID';
+    process.env.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL =
+      'CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL';
+    process.env.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY =
+      'CHROME_SERVICE_ACCOUNT_PRIVATE_KEY';
+    const chromePublishType = 'STAGED_PUBLISH';
+    process.env.CHROME_PUBLISH_TYPE = chromePublishType;
 
     process.env.FIREFOX_ZIP = 'FIREFOX_ZIP';
     process.env.FIREFOX_SOURCES_ZIP = 'FIREFOX_SOURCES_ZIP';
+    process.env.FIREFOX_AMO_METADATA_FILE = 'FIREFOX_AMO_METADATA_FILE';
     process.env.FIREFOX_EXTENSION_ID = 'FIREFOX_EXTENSION_ID';
     process.env.FIREFOX_JWT_ISSUER = 'FIREFOX_JWT_ISSUER';
     process.env.FIREFOX_JWT_SECRET = 'FIREFOX_JWT_SECRET';
     const firefoxChannel = 'unlisted';
     process.env.FIREFOX_CHANNEL = firefoxChannel;
+    const firefoxCompatibility: FirefoxAddonStoreV5Options['compatibility'] = [
+      'android',
+      'firefox',
+    ];
+    process.env.FIREFOX_COMPATIBILITY = firefoxCompatibility.join(',');
+    const firefoxSkipSubmitReview = true;
+    process.env.FIREFOX_SKIP_SUBMIT_REVIEW = String(firefoxSkipSubmitReview);
 
     process.env.EDGE_ZIP = 'EDGE_ZIP';
     process.env.EDGE_PRODUCT_ID = 'EDGE_PRODUCT_ID';
     process.env.EDGE_CLIENT_ID = 'EDGE_CLIENT_ID';
     process.env.EDGE_API_KEY = 'EDGE_API_KEY';
-    process.env.EDGE_CLIENT_SECRET = 'EDGE_CLIENT_SECRET';
-    process.env.EDGE_ACCESS_TOKEN_URL = 'EDGE_ACCESS_TOKEN_URL';
     const edgeSkipSubmitReview = true;
     process.env.EDGE_SKIP_SUBMIT_REVIEW = String(edgeSkipSubmitReview);
 
-    const expected: InternalConfig = {
+    process.env.OPERA_ZIP = 'OPERA_ZIP';
+    process.env.OPERA_SESSION_ID = 'OPERA_SESSION_ID';
+    const operaPackageId = 1;
+    process.env.OPERA_PACKAGE_ID = String(operaPackageId);
+    const operaSkipSubmitReview = true;
+    process.env.OPERA_SKIP_SUBMIT_REVIEW = String(operaSkipSubmitReview);
+
+    const expected: ResolvedConfig = {
       dryRun,
       chrome: {
+        apiVersion: 'v2',
         zip: process.env.CHROME_ZIP!,
         extensionId: process.env.CHROME_EXTENSION_ID!,
         publisherId: process.env.CHROME_PUBLISHER_ID!,
-        clientId: process.env.CHROME_CLIENT_ID!,
-        clientSecret: process.env.CHROME_CLIENT_SECRET!,
-        refreshToken: process.env.CHROME_REFRESH_TOKEN!,
+        serviceAccountClientEmail:
+          process.env.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL!,
+        serviceAccountPrivateKey:
+          process.env.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY!,
+        publishType: chromePublishType,
+        skipReview: chromeSkipReview,
         deployPercentage: chromeDeployPercentage,
         skipSubmitReview: chromeSkipSubmitReview,
-        cancelPending: chromeCancelPending,
-        skipReview: chromeSkipReview,
-        publishType: chromePublishType,
+        cancelPending: false,
       },
       firefox: {
         zip: process.env.FIREFOX_ZIP,
         sourcesZip: process.env.FIREFOX_SOURCES_ZIP,
+        amoMetadataFile: process.env.FIREFOX_AMO_METADATA_FILE,
         channel: firefoxChannel,
         extensionId: process.env.FIREFOX_EXTENSION_ID,
         jwtIssuer: process.env.FIREFOX_JWT_ISSUER,
         jwtSecret: process.env.FIREFOX_JWT_SECRET,
+        compatibility: firefoxCompatibility,
+        skipSubmitReview: firefoxSkipSubmitReview,
       },
       edge: {
         zip: process.env.EDGE_ZIP,
         productId: process.env.EDGE_PRODUCT_ID,
         clientId: process.env.EDGE_CLIENT_ID,
         apiKey: process.env.EDGE_API_KEY,
-        accessTokenUrl: process.env.EDGE_ACCESS_TOKEN_URL,
-        clientSecret: process.env.EDGE_CLIENT_SECRET,
         skipSubmitReview: edgeSkipSubmitReview,
+      },
+      opera: {
+        zip: process.env.OPERA_ZIP,
+        packageId: operaPackageId,
+        sessionId: process.env.OPERA_SESSION_ID!,
+        skipSubmitReview: operaSkipSubmitReview,
       },
     };
 
@@ -137,12 +166,12 @@ describe('resolveConfig', () => {
   it('should apply defaults', () => {
     const config: InlineConfig = {
       chrome: {
-        zip: 'zip',
+        apiVersion: 'v2',
         extensionId: 'extensionId',
         publisherId: 'publisherId',
-        clientId: 'clientId',
-        clientSecret: 'clientSecret',
-        refreshToken: 'refreshToken',
+        serviceAccountClientEmail: 'serviceAccountClientEmail',
+        serviceAccountPrivateKey: 'serviceAccountPrivateKey',
+        zip: 'zip',
       },
       firefox: {
         jwtIssuer: 'jwtIssuer',
@@ -153,11 +182,14 @@ describe('resolveConfig', () => {
       },
       edge: {
         clientId: 'clientId',
-        clientSecret: 'clientSecret',
         productId: 'productId',
-        accessTokenUrl: 'accessTokenUrl',
         apiKey: 'apiKey',
         zip: 'zip',
+      },
+      opera: {
+        zip: 'zip',
+        packageId: 1,
+        sessionId: 'sessionId',
       },
     };
 
@@ -167,27 +199,32 @@ describe('resolveConfig', () => {
       chrome: {
         ...config.chrome,
         skipSubmitReview: false,
-        cancelPending: false,
-        skipReview: false,
+        skipReview: undefined,
         deployPercentage: undefined,
-        publishType: 'DEFAULT_PUBLISH' as const,
+        publishType: undefined,
+        cancelPending: false,
       },
       firefox: {
         ...config.firefox,
         channel: 'listed' as const,
+        skipSubmitReview: false,
       },
       edge: {
         ...config.edge,
         skipSubmitReview: false,
       },
-    };
+      opera: {
+        ...config.opera,
+        skipSubmitReview: false,
+      },
+    } as ResolvedConfig;
 
     const actual = resolveConfig(config);
 
     expect(actual).toEqual(expected);
   });
 
-  it('should exclude chrome, firefox, and edge objects when their zip option is not passed', () => {
+  it('should exclude chrome, firefox, edge and opera objects when their zip option is not passed', () => {
     const config: InlineConfig = {
       dryRun: false,
       chrome: {
@@ -199,12 +236,16 @@ describe('resolveConfig', () => {
       edge: {
         clientId: 'clientId',
       },
+      opera: {
+        packageId: 1,
+      },
     };
-    const expected: InternalConfig = {
+    const expected: ResolvedConfig = {
       dryRun: false,
       chrome: undefined,
       edge: undefined,
       firefox: undefined,
+      opera: undefined,
     };
 
     const actual = resolveConfig(config);
@@ -218,11 +259,12 @@ describe('validateConfig', () => {
     const config: InlineConfig = {
       dryRun: true,
       chrome: {
-        clientId: 'clientId',
+        apiVersion: 'v2',
+        extensionId: ' ',
       },
     };
     expect(() => validateConfig(config)).toThrowError(
-      'Missing required config: CHROME_ZIP, CHROME_EXTENSION_ID, CHROME_PUBLISHER_ID, CHROME_CLIENT_SECRET, CHROME_REFRESH_TOKEN',
+      'Invalid config:\n  - \u001B[36mchrome.zip\u001B[39m: Expected a string, but received: undefined\n  - \u001B[36mchrome.extensionId\u001B[39m: Expected a nonempty string but received an empty one\n  - \u001B[36mchrome.publisherId\u001B[39m: Expected a string, but received: undefined\n  - \u001B[36mchrome.serviceAccountClientEmail\u001B[39m: Expected a string, but received: undefined\n  - \u001B[36mchrome.serviceAccountPrivateKey\u001B[39m: Expected a string, but received: undefined',
     );
   });
 });

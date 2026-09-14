@@ -1,7 +1,9 @@
-export * from './submit';
-export * from './init';
-export { InlineConfig } from './config';
+export * from './commands/submit';
+export * from './commands/init';
+export * from './config';
 
-export * from './firefox';
-export * from './edge';
-export * from './chrome';
+export * from './stores/firefox-addon-store-v5';
+export * from './stores/edge-addon-store-v1.1';
+export * from './stores/chrome-web-store-v1.1';
+export * from './stores/chrome-web-store-v2';
+export * from './stores/opera-addons-store';

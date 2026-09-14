@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 
-function run(cmd, args = []) {
+function run(cmd: string, args: string[] = []) {
   const result = spawnSync(cmd, args, {
     stdio: 'inherit',
   });
@@ -15,9 +15,12 @@ try {
   run('bun', ['build:test-extension']);
 
   const TARGET = process.argv[2];
-  const ARGS = process.argv.slice(2); // allow flags override
-  const publish = (args = []) =>
-    run('bun', ['bin/publish-extension.mjs', ...args, ...ARGS]);
+  const publish = (args: string[] = []) => {
+    return run(process.env.DEV_RUNNER ?? 'node', [
+      'bin/publish-extension.mjs',
+      ...args,
+    ]);
+  };
 
   switch (TARGET) {
     case 'all':
@@ -29,6 +32,8 @@ try {
         '--firefox-sources-zip',
         'extension/firefox.zip',
         '--edge-zip',
+        'extension/chrome.zip',
+        '--opera-zip',
         'extension/chrome.zip',
       ]);
       break;
@@ -50,10 +55,14 @@ try {
       publish(['--edge-zip', 'extension/chrome.zip']);
       break;
 
+    case 'opera':
+      publish(['--opera-zip', 'extension/chrome.zip']);
+      break;
+
     default:
       console.log();
       console.log(
-        "Run 'bun dev:chrome' or 'bun dev:firefox' or 'bun dev:edge' or 'bun dev:all'",
+        "Run 'bun dev:chrome' or 'bun dev:firefox' or 'bun dev:edge' or 'bun dev:opera' or 'bun dev:all'",
       );
       publish();
       break;

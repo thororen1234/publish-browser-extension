@@ -8,6 +8,16 @@ on:
       - main
 
 jobs:
+  code-gen:
+    name: Generated Code
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: ./.github/actions/setup
+      - run: bun run gen
+      - name: Check for changes
+        run: git diff --exit-code || (git diff && exit 1)
+
   checks:
     name: Checks
     runs-on: ubuntu-24.04
@@ -19,26 +29,66 @@ jobs:
       - run: bun test
       - run: bun bin/publish-extension.mjs --help
   e2e-tests:
-    name: E2E Tests
+    name: E2E Tests (${{ matrix.runtime.name }})
     runs-on: ubuntu-24.04
+    strategy:
+      max-parallel: 1 # Can't run E2E tests at the same time
+      matrix:
+        runtime:
+          - name: Node 22
+            version: 22
+            bin: node
+          - name: Node 24
+            version: 24
+            bin: node
+          - name: Node 26
+            version: 26
+            bin: node
+          - name: Bun
+            bin: bun
     # If PR is from a fork, secrets aren't available, so skip this job.
     if: github.event.pull_request.head.repo.fork != true
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/setup
-      - run: bun ./scripts/dev.mjs all
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # 6.4.0
+        if: matrix.runtime.bin == 'node'
+        with:
+          node-version: ${{ matrix.runtime.version }}
+      - run: bun run build
+      - name: Run E2E test
+        run: |
+          ${{ matrix.runtime.bin }} --version
+          ${{ matrix.runtime.bin }} bin/publish-extension.mjs
         env:
+          DEV_RUNNER: ${{ matrix.runtime.bin }}
+          # ZIPs - comment out to disable store
+          CHROME_ZIP: extension/chrome.zip
+          # FIREFOX_ZIP: extension/firefox.zip
+          # FIREFOX_SOURCES_ZIP: extension/firefox.zip
+          EDGE_ZIP: extension/chrome.zip
+          # OPERA_ZIP: extension/chrome.zip
+          # Chrome
+          CHROME_API_VERSION: v2
           CHROME_EXTENSION_ID: ${{ secrets.TEST_CHROME_EXTENSION_ID }}
-          CHROME_PUBLISHER_ID: ${{ secrets.TEST_CHROME_PUBLISHER_ID }}
-          CHROME_CLIENT_ID: ${{ secrets.TEST_CHROME_CLIENT_ID }}
-          CHROME_CLIENT_SECRET: ${{ secrets.TEST_CHROME_CLIENT_SECRET }}
-          CHROME_REFRESH_TOKEN: ${{ secrets.TEST_CHROME_REFRESH_TOKEN }}
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
           CHROME_SKIP_SUBMIT_REVIEW: 'true'
+          CHROME_PUBLISH_TARGET: trustedTesters
+          # Firefox
           FIREFOX_EXTENSION_ID: ${{ secrets.TEST_FIREFOX_EXTENSION_ID }}
           FIREFOX_JWT_ISSUER: ${{ secrets.TEST_FIREFOX_JWT_ISSUER }}
           FIREFOX_JWT_SECRET: ${{ secrets.TEST_FIREFOX_JWT_SECRET }}
           FIREFOX_CHANNEL: unlisted
+          FIREFOX_COMPATIBILITY: firefox,android
+          FIREFOX_SKIP_SUBMIT_REVIEW: 'true'
+          # Edge
           EDGE_PRODUCT_ID: ${{ secrets.TEST_EDGE_PRODUCT_ID }}
           EDGE_CLIENT_ID: ${{ secrets.TEST_EDGE_CLIENT_ID }}
           EDGE_API_KEY: ${{ secrets.TEST_EDGE_API_KEY }}
           EDGE_SKIP_SUBMIT_REVIEW: 'true'
+          # Opera
+          OPERA_PACKAGE_ID: ${{ secrets.TEST_OPERA_PACKAGE_ID }}
+          OPERA_SESSION_ID: ${{ secrets.TEST_OPERA_SESSION_ID }}
+          OPERA_SKIP_SUBMIT_REVIEW: 'true'
